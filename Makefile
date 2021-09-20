@@ -1,7 +1,7 @@
 CC=gcc
 CPP=g++
 
-CFLAGS=-fexceptions -s -O2 -g -Wall -Wextra $(shell pkg-config --cflags gtk+-3.0 opus portaudio-2.0) -Isrc/ -DMINIUPNP_STATICLIB -DDEBUG
+CFLAGS=-fexceptions -g -Wall -Wextra $(shell pkg-config --cflags gtk+-3.0 opus portaudio-2.0) -Isrc/ -DMINIUPNP_STATICLIB -DDEBUG
 LDFLAGS=$(shell pkg-config --libs gtk+-3.0 opus portaudio-2.0)
 
 ODIR=obj
@@ -22,9 +22,9 @@ $(ODIR)/%.o: %.cpp
 	@mkdir -p $(@D)
 	$(CPP) -c -o $(ODIR)/$(notdir $@) $< $(CFLAGS)
 
-tincanphone: $(OBJ)
+all: $(OBJ)
 	@mkdir -p bin
-	$(CPP) -o bin/$@ $(patsubst %,$(ODIR)/%,$(notdir $^)) $(CFLAGS) $(LDFLAGS)
+	$(CPP) -o bin/tincanphone $(patsubst %,$(ODIR)/%,$(notdir $^)) $(CFLAGS) $(LDFLAGS)
 
 .PHONY: clean
 
