@@ -431,7 +431,7 @@ void Phone::goLive()
 		throw std::runtime_error(string("opus_encoder_create error: ") + opus_strerror(opusErr));
 
 	opus_encoder_ctl(encoder, OPUS_SET_BANDWIDTH(OPUS_BANDWIDTH_NARROWBAND));
-	opus_encoder_ctl(encoder, OPUS_SET_BITRATE(9600));
+	opus_encoder_ctl(encoder, OPUS_SET_BITRATE(6000));
 	opus_encoder_ctl(encoder, OPUS_SET_COMPLEXITY(0));
 	opus_encoder_ctl(encoder, OPUS_SET_SIGNAL(OPUS_SIGNAL_VOICE));
 	decoder = opus_decoder_create(SAMPLE_RATE, CHANNELS, &opusErr);
