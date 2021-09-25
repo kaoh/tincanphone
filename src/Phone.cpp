@@ -147,32 +147,32 @@ void Phone::startup()
 
 	// Open WAN port via Router
 	uint16 wanPort = PORT_DEFAULT;
-	try
-	{
-		router = new Router(UPNP_TIMEOUT_MS);
-
-		for (;;)
-		{
-			// Returns FALSE if port in use
-			if ( !router->setPortMapping(localPort, wanPort, Router::MAP_UDP, "Tin Can Phone") )
-			{
-				wanPort++;
-				if (wanPort > PORT_MAX)
-					throw std::runtime_error("Could not find an available port on router");
-			}
-			else
-			{
-				break;
-			}
-		}
-	}
-	catch (std::runtime_error& ex)
-	{
-		// Log error but complete startup
-		log << "*** ERROR: " << ex.what() << ". You may need to forward UDP port " << localPort << " manually." << endl;
-		state = HUNGUP;
-		return;
-	}
+//	try
+//	{
+//		router = new Router(UPNP_TIMEOUT_MS);
+//
+//		for (;;)
+//		{
+//			// Returns FALSE if port in use
+//			if ( !router->setPortMapping(localPort, wanPort, Router::MAP_UDP, "Tin Can Phone") )
+//			{
+//				wanPort++;
+//				if (wanPort > PORT_MAX)
+//					throw std::runtime_error("Could not find an available port on router");
+//			}
+//			else
+//			{
+//				break;
+//			}
+//		}
+//	}
+//	catch (std::runtime_error& ex)
+//	{
+//		// Log error but complete startup
+//		log << "*** ERROR: " << ex.what() << ". You may need to forward UDP port " << localPort << " manually." << endl;
+//		state = HUNGUP;
+//		return;
+//	}
 
 
 	// Only specify port in log if it's not the default
@@ -182,7 +182,7 @@ void Phone::startup()
 	
 	// Done starting up
 	state = HUNGUP;
-	log << "Ready! Your IP address is: " << router->getWanAddress() << portstr << endl;
+//	log << "Ready! Your IP address is: " << router->getWanAddress() << portstr << endl;
 }
 
 bool Phone::run()
