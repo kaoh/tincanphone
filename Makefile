@@ -1,7 +1,7 @@
 CC=gcc
 CPP=g++
 
-CFLAGS=-fexceptions -g -Wall -Wextra $(shell pkg-config --cflags gtk+-3.0 opus codec2 portaudio-2.0) -Isrc/ -DMINIUPNP_STATICLIB -DDEBUG
+CFLAGS=-fexceptions -fstack-protector-all -fsanitize=address -g -O0 -Wall -Wextra $(shell pkg-config --cflags gtk+-3.0 opus codec2 portaudio-2.0) -Isrc/ -DMINIUPNP_STATICLIB -DDEBUG
 LDFLAGS=$(shell pkg-config --libs gtk+-3.0 opus codec2 portaudio-2.0)
 
 ODIR=obj

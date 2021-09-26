@@ -338,8 +338,7 @@ bool Phone::run()
 	}
 	else if (state == LIVE)
 	{
-		int enc = codec2_bits_per_frame(encoder) / 8 * PACKET_SAMPLES;
-		unsigned char compressed_bytes[enc];
+		unsigned char compressed_bytes[BYTES_PER_FRAME];
 		// Read microphone stream and send packets
 		while (Pa_GetStreamReadAvailable(stream) >= PACKET_SAMPLES)
 		{
@@ -360,12 +359,13 @@ bool Phone::run()
 			++sendseq;
 
 			codec2_encode(encoder, compressed_bytes, microphone);
-			memcpy(sendbuf.data, compressed_bytes, enc);
+			memcpy(sendbuf.data, compressed_bytes, BYTES_PER_FRAME);
 //			opus_int32 enc = opus_encode(encoder, microphone, PACKET_SAMPLES, sendbuf.data, sizeof(sendbuf.data));
 //			if (enc < 0)
 //				throw std::runtime_error(string("opus_encode error: ") + opus_strerror(enc));
 			
-			int sendsize = sizeof(packet.header) + sizeof(packet.seq) + enc;
+			int sendsize = sizeof(packet.header) + sizeof(packet.seq) + BYTES_PER_FRAME;
+//			int sendsize = sizeof(packet.header) + sizeof(packet.seq) + enc;
 			sendPacket((char*)&sendbuf, sendsize, address);
 		}
 

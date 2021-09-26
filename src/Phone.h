@@ -24,6 +24,7 @@ enum Constants {
 	SAMPLE_RATE = 16000,        //16kHz, the number of 16-bit samples per second
 //	PACKET_MS = 20,             //How long a single packet of samples is (20ms recommended by Opus)
 	PACKET_MS = 40,             //How long a single packet of samples is (40ms at 1400 bits)
+	BYTES_PER_FRAME = 7,        //How many bytes at 1400 bits a frame consumes
 //	PACKET_SAMPLES = 320,       //Samples per packet (16kHz * 0.020s = 320 samples)
 //	PACKET_SAMPLES = 960,       //Samples per packet (48kHz * 0.020s = 960 samples)
 	PACKET_SAMPLES = 640,       //Samples per packet (16kHz * 0.040s = 640 samples)
@@ -118,7 +119,7 @@ protected:
 		uint32 header;
 		uint32 seq; //AUDIO packet sequence number, 32 bits is enough for ~1000 days of 20ms packets
 //		byte   data[ENCODED_MAX_BYTES]; //AUDIO packet payload
-		byte   data[1024]; //AUDIO packet payload
+		byte   data[BYTES_PER_FRAME]; //AUDIO packet payload
 	};
 
 	struct AudioPacket
