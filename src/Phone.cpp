@@ -582,6 +582,7 @@ void Phone::playReceivedAudio()
 //	opus_int32 decodeRet;
 
 	int a = codec2_samples_per_frame(encoder);
+	int v = codec2_bits_per_frame(encoder);
 	if (audiobuf.front().datasize)
 	{
 		// Decode a packet from the front of the buffer
