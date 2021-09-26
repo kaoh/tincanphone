@@ -94,26 +94,29 @@ void Phone::startup()
 	}
 
 
-//	// Generate sound buffers
-//	
-//	// The sound of silence - Simon and Garfunkel not required
-//	memset(silence, 0, sizeof(silence));
-//
-//	// Note that the tone frequencies should fit evenly into a single 20ms sample (ie. be multiples of 50)
-//	static const float pi2 = 2.f * 3.14159265f;
+	// Generate sound buffers
+
+	// The sound of silence - Simon and Garfunkel not required
+	memset(silence, 0, sizeof(silence));
+
+	// Note that the tone frequencies should fit evenly into a single 20ms sample (ie. be multiples of 50)
+	static const float pi2 = 2.f * 3.14159265f;
 //	static const float amp16 = 0.5f * float(std::numeric_limits<opus_int16>::max());
-//
-//	// 400hz
-//	for (uint s = 0; s < PACKET_SAMPLES; ++s) {
-//		float x = float(s) / float(SAMPLE_RATE);
+	static const float amp16 = 0.5f * float(std::numeric_limits<short>::max());
+
+	// 400hz
+	for (uint s = 0; s < PACKET_SAMPLES; ++s) {
+		float x = float(s) / float(SAMPLE_RATE);
+		ringToneIn[s] = short( sin(x * 400.f * pi2) * amp16 );
 //		ringToneIn[s] = opus_int16( sin(x * 400.f * pi2) * amp16 );
-//	}
-//
-//	// 250hz
-//	for (uint s = 0; s < PACKET_SAMPLES; ++s) {
-//		float x = float(s) / float(SAMPLE_RATE);
+	}
+
+	// 250hz
+	for (uint s = 0; s < PACKET_SAMPLES; ++s) {
+		float x = float(s) / float(SAMPLE_RATE);
+		ringToneOut[s] = short( sin(x * 250.f * pi2) * amp16 );
 //		ringToneOut[s] = opus_int16( sin(x * 250.f * pi2) * amp16 );
-//	}
+	}
 
 
 	// Setup socket
