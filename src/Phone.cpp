@@ -338,7 +338,7 @@ bool Phone::run()
 	}
 	else if (state == LIVE)
 	{
-		int enc = codec2_bits_per_frame(encoder) * 8;
+		int enc = codec2_bits_per_frame(encoder) / 8 * PACKET_SAMPLES;
 		unsigned char compressed_bytes[enc];
 		// Read microphone stream and send packets
 		while (Pa_GetStreamReadAvailable(stream) >= PACKET_SAMPLES)

@@ -26,7 +26,7 @@ enum Constants {
 	PACKET_MS = 40,             //How long a single packet of samples is (40ms at 1400 bits)
 //	PACKET_SAMPLES = 320,       //Samples per packet (16kHz * 0.020s = 320 samples)
 //	PACKET_SAMPLES = 960,       //Samples per packet (48kHz * 0.020s = 960 samples)
-	PACKET_SAMPLES = 160,       //Samples per packet (16kHz * 0.040s = 160 samples)
+	PACKET_SAMPLES = 640,       //Samples per packet (16kHz * 0.040s = 640 samples)
 //	ENCODED_MAX_BYTES = 240,    //Max size of a single packet's data once compressed (capacity of opus_encode buffer)
 	BUFFERED_PACKETS_MIN = 2,   //How many packets to build up before we start playing audio
 	BUFFERED_PACKETS_MAX = 5,   //When too many packets have built up and we start skipping them to speed up playback
