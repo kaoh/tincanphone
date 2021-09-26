@@ -8,7 +8,8 @@
 #include "Router.h"
 #include "Socket.h"
 #include <deque>
-#include <opus.h>
+//#include <opus.h>
+#include <codec2.h>
 #include <portaudio.h>
 
 namespace tincan {
@@ -18,12 +19,15 @@ enum Constants {
 	PORT_DEFAULT = 56780,
 	PORT_MAX     = 56789,
 	CHANNELS = 1,               //1 channel (mono) audio
-//	SAMPLE_RATE = 48000,        //48kHz, the number of 16-bit samples per second
-	SAMPLE_RATE = 16000,        //16kHz, the number of 16-bit samples per second
-	PACKET_MS = 20,             //How long a single packet of samples is (20ms recommended by Opus)
-	PACKET_SAMPLES = 320,       //Samples per packet (16kHz * 0.020s = 320 samples)
+	CODEC_MODE = CODEC2_MODE_1300,
+	SAMPLE_RATE = 48000,        //48kHz, the number of 16-bit samples per second
+//	SAMPLE_RATE = 16000,        //16kHz, the number of 16-bit samples per second
+//	PACKET_MS = 20,             //How long a single packet of samples is (20ms recommended by Opus)
+	PACKET_MS = 40,             //How long a single packet of samples is (20ms at 1300 bits)
+//	PACKET_SAMPLES = 320,       //Samples per packet (16kHz * 0.020s = 320 samples)
 //	PACKET_SAMPLES = 960,       //Samples per packet (48kHz * 0.020s = 960 samples)
-	ENCODED_MAX_BYTES = 240,    //Max size of a single packet's data once compressed (capacity of opus_encode buffer)
+	PACKET_SAMPLES = 480,       //Samples per packet (48kHz * 0.040s = 960 samples)
+//	ENCODED_MAX_BYTES = 240,    //Max size of a single packet's data once compressed (capacity of opus_encode buffer)
 	BUFFERED_PACKETS_MIN = 2,   //How many packets to build up before we start playing audio
 	BUFFERED_PACKETS_MAX = 5,   //When too many packets have built up and we start skipping them to speed up playback
 	DISCONNNECT_TIMEOUT = 5000, //How long to wait for valid AUDIO packets before we time out and disconnect
@@ -113,13 +117,15 @@ protected:
 		enum Header { RING = 4000, BUSY, AUDIO, HANGUP };
 		uint32 header;
 		uint32 seq; //AUDIO packet sequence number, 32 bits is enough for ~1000 days of 20ms packets
-		byte   data[ENCODED_MAX_BYTES]; //AUDIO packet payload
+//		byte   data[ENCODED_MAX_BYTES]; //AUDIO packet payload
+		byte   data[1024]; //AUDIO packet payload
 	};
 
 	struct AudioPacket
 	{
 		uint32 seq;
-		byte   data[ENCODED_MAX_BYTES];
+		byte   data[1024];
+//		byte   data[ENCODED_MAX_BYTES];
 		uint   datasize;
 		AudioPacket() : datasize(0)  {}
 		bool operator == (uint32 rhs)  {return seq == rhs;} //For std::find
@@ -137,13 +143,19 @@ protected:
 
 	Router*      router;
 	SOCKET       sock;
-	OpusEncoder* encoder;
-	OpusDecoder* decoder;
+	CODEC2 *encoder;
+	CODEC2 *decoder;
+//	OpusEncoder* encoder;
+//	OpusDecoder* decoder;
 	PaStream*    stream;
 
-	opus_int16   silence[PACKET_SAMPLES];
-	opus_int16   ringToneIn[PACKET_SAMPLES];
-	opus_int16   ringToneOut[PACKET_SAMPLES];
+//	opus_int16   silence[PACKET_SAMPLES];
+//	opus_int16   ringToneIn[PACKET_SAMPLES];
+//	opus_int16   ringToneOut[PACKET_SAMPLES];
+
+	short   silence[PACKET_SAMPLES];
+	short   ringToneIn[PACKET_SAMPLES];
+	short   ringToneOut[PACKET_SAMPLES];
 
 
 	void startup();

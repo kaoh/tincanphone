@@ -67,9 +67,11 @@ Phone::~Phone()
 
 	// Cleanup opus
 	if (decoder)
-		opus_decoder_destroy(decoder);
+		codec2_destroy(decoder);
+//		opus_decoder_destroy(decoder);
 	if (encoder)
-		opus_encoder_destroy(encoder);
+		codec2_destroy(encoder);
+//		opus_encoder_destroy(encoder);
 
 	// Close socket (ignore errors)
 	if (sock != -1)
@@ -92,26 +94,26 @@ void Phone::startup()
 	}
 
 
-	// Generate sound buffers
-	
-	// The sound of silence - Simon and Garfunkel not required
-	memset(silence, 0, sizeof(silence));
-
-	// Note that the tone frequencies should fit evenly into a single 20ms sample (ie. be multiples of 50)
-	static const float pi2 = 2.f * 3.14159265f;
-	static const float amp16 = 0.5f * float(std::numeric_limits<opus_int16>::max());
-
-	// 400hz
-	for (uint s = 0; s < PACKET_SAMPLES; ++s) {
-		float x = float(s) / float(SAMPLE_RATE);
-		ringToneIn[s] = opus_int16( sin(x * 400.f * pi2) * amp16 );
-	}
-
-	// 250hz
-	for (uint s = 0; s < PACKET_SAMPLES; ++s) {
-		float x = float(s) / float(SAMPLE_RATE);
-		ringToneOut[s] = opus_int16( sin(x * 250.f * pi2) * amp16 );
-	}
+//	// Generate sound buffers
+//	
+//	// The sound of silence - Simon and Garfunkel not required
+//	memset(silence, 0, sizeof(silence));
+//
+//	// Note that the tone frequencies should fit evenly into a single 20ms sample (ie. be multiples of 50)
+//	static const float pi2 = 2.f * 3.14159265f;
+//	static const float amp16 = 0.5f * float(std::numeric_limits<opus_int16>::max());
+//
+//	// 400hz
+//	for (uint s = 0; s < PACKET_SAMPLES; ++s) {
+//		float x = float(s) / float(SAMPLE_RATE);
+//		ringToneIn[s] = opus_int16( sin(x * 400.f * pi2) * amp16 );
+//	}
+//
+//	// 250hz
+//	for (uint s = 0; s < PACKET_SAMPLES; ++s) {
+//		float x = float(s) / float(SAMPLE_RATE);
+//		ringToneOut[s] = opus_int16( sin(x * 250.f * pi2) * amp16 );
+//	}
 
 
 	// Setup socket
@@ -333,12 +335,17 @@ bool Phone::run()
 	}
 	else if (state == LIVE)
 	{
+		int enc = codec2_bits_per_frame(encoder) * 8;
+		unsigned char compressed_bytes[enc];
 		// Read microphone stream and send packets
 		while (Pa_GetStreamReadAvailable(stream) >= PACKET_SAMPLES)
 		{
 			// The 'frames' param of Pa_ReadStream should match 'framesPerBuffer' param of Pa_OpenStream
-			opus_int16 microphone[PACKET_SAMPLES];
+			short microphone[PACKET_SAMPLES];
+
 			PaError paErr = Pa_ReadStream(stream, microphone, PACKET_SAMPLES);
+//			opus_int16 microphone[PACKET_SAMPLES];
+//			PaError paErr = Pa_ReadStream(stream, microphone, PACKET_SAMPLES);
 			if (paErr && paErr != paInputOverflowed)
 				throw std::runtime_error(string("Pa_ReadStream error: ") + Pa_GetErrorText(paErr));
 
@@ -349,9 +356,11 @@ bool Phone::run()
 			
 			++sendseq;
 
-			opus_int32 enc = opus_encode(encoder, microphone, PACKET_SAMPLES, sendbuf.data, sizeof(sendbuf.data));
-			if (enc < 0)
-				throw std::runtime_error(string("opus_encode error: ") + opus_strerror(enc));
+			codec2_encode(encoder, compressed_bytes, microphone);
+			memcpy(sendbuf.data, compressed_bytes, enc);
+//			opus_int32 enc = opus_encode(encoder, microphone, PACKET_SAMPLES, sendbuf.data, sizeof(sendbuf.data));
+//			if (enc < 0)
+//				throw std::runtime_error(string("opus_encode error: ") + opus_strerror(enc));
 			
 			int sendsize = sizeof(packet.header) + sizeof(packet.seq) + enc;
 			sendPacket((char*)&sendbuf, sendsize, address);
@@ -382,9 +391,11 @@ void Phone::hangup()
 
 	if (state == LIVE)
 	{
-		opus_decoder_destroy(decoder);
+		codec2_destroy(decoder);
+//		opus_decoder_destroy(decoder);
 		decoder = NULL;
-		opus_encoder_destroy(encoder);
+		codec2_destroy(encoder);
+//		opus_encoder_destroy(encoder);
 		encoder = NULL;
 
 		audiobuf.clear();
@@ -425,18 +436,20 @@ void Phone::goLive()
 	missedPackets = 0;
 
 	// Initialize opus
-	int opusErr;
-	encoder = opus_encoder_create(SAMPLE_RATE, CHANNELS, OPUS_APPLICATION_VOIP, &opusErr);
-	if (opusErr != OPUS_OK)
-		throw std::runtime_error(string("opus_encoder_create error: ") + opus_strerror(opusErr));
+//	int opusErr;
+	encoder = codec2_create(CODEC_MODE);
+//	encoder = opus_encoder_create(SAMPLE_RATE, CHANNELS, OPUS_APPLICATION_VOIP, &opusErr);
+//	if (opusErr != OPUS_OK)
+//		throw std::runtime_error(string("opus_encoder_create error: ") + opus_strerror(opusErr));
 
-	opus_encoder_ctl(encoder, OPUS_SET_BANDWIDTH(OPUS_BANDWIDTH_NARROWBAND));
-	opus_encoder_ctl(encoder, OPUS_SET_BITRATE(6000));
-	opus_encoder_ctl(encoder, OPUS_SET_COMPLEXITY(0));
-	opus_encoder_ctl(encoder, OPUS_SET_SIGNAL(OPUS_SIGNAL_VOICE));
-	decoder = opus_decoder_create(SAMPLE_RATE, CHANNELS, &opusErr);
-	if (opusErr != OPUS_OK)
-		throw std::runtime_error(string("opus_decoder_create error: ") + opus_strerror(opusErr));
+//	opus_encoder_ctl(encoder, OPUS_SET_BANDWIDTH(OPUS_BANDWIDTH_NARROWBAND));
+//	opus_encoder_ctl(encoder, OPUS_SET_BITRATE(6000));
+//	opus_encoder_ctl(encoder, OPUS_SET_COMPLEXITY(0));
+//	opus_encoder_ctl(encoder, OPUS_SET_SIGNAL(OPUS_SIGNAL_VOICE));
+	decoder = codec2_create(CODEC_MODE);
+//	decoder = opus_decoder_create(SAMPLE_RATE, CHANNELS, &opusErr);
+//	if (opusErr != OPUS_OK)
+//		throw std::runtime_error(string("opus_decoder_create error: ") + opus_strerror(opusErr));
 
 	// Start portaudio stream
 	log << "*** Call started" << endl;
@@ -542,6 +555,7 @@ void Phone::playReceivedAudio()
 	{
 		if (audiobuf.size() == 1 && !audiobuf.front().datasize)
 		{
+
 			disconnectTimer += PACKET_MS;
 			if (disconnectTimer > DISCONNNECT_TIMEOUT)
 			{
@@ -560,26 +574,28 @@ void Phone::playReceivedAudio()
 		return;
 	}
 
-	opus_int16 decoded[PACKET_SAMPLES];
-	opus_int32 decodeRet;
+	short decoded[PACKET_SAMPLES];
+//	opus_int16 decoded[PACKET_SAMPLES];
+//	opus_int32 decodeRet;
 
 	if (audiobuf.front().datasize)
 	{
 		// Decode a packet from the front of the buffer
 		AudioPacket& front = audiobuf.front();
-		decodeRet = opus_decode(decoder, front.data, front.datasize, decoded, PACKET_SAMPLES, 0);
-		if (decodeRet == OPUS_INVALID_PACKET)
-		{
-			log << "Corrupt packet " << front.seq << endl;
-			// Try again by treating the packet as lost
-			decodeRet = opus_decode(decoder, NULL, 0, decoded, PACKET_SAMPLES, 0);
-		}
-		else
-		{
+		codec2_decode(decoder, decoded, front.data);
+//		decodeRet = opus_decode(decoder, front.data, front.datasize, decoded, PACKET_SAMPLES, 0);
+//		if (decodeRet == OPUS_INVALID_PACKET)
+//		{
+//			log << "Corrupt packet " << front.seq << endl;
+//			// Try again by treating the packet as lost
+//			decodeRet = opus_decode(decoder, NULL, 0, decoded, PACKET_SAMPLES, 0);
+//		}
+//		else
+//		{
 			// Successfully played an audio packet
 			missedPackets = 0;
 			disconnectTimer = 0;
-		}
+//		}
 	}
 	else
 	{
@@ -593,12 +609,12 @@ void Phone::playReceivedAudio()
 		if (audiobuf.size() < BUFFERED_PACKETS_MIN || (missedPackets > 1 && audiobuf.size() < BUFFERED_PACKETS_MAX))
 			increaseBuffering = true;
 
-		decodeRet = opus_decode(decoder, NULL, 0, decoded, PACKET_SAMPLES, 0);
+//		decodeRet = opus_decode(decoder, NULL, 0, decoded, PACKET_SAMPLES, 0);
 	}
 
-	// Check for Opus error from above
-	if (decodeRet < 0)
-		throw std::runtime_error(string("opus_decode failed: ") + opus_strerror(decodeRet));
+//	// Check for Opus error from above
+//	if (decodeRet < 0)
+//		throw std::runtime_error(string("opus_decode failed: ") + opus_strerror(decodeRet));
 
 	// Pop the packet we just decoded
 	if (audiobuf.size() == 1)
