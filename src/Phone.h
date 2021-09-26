@@ -19,9 +19,9 @@ enum Constants {
 	PORT_MAX     = 56789,
 	CHANNELS = 1,               //1 channel (mono) audio
 //	SAMPLE_RATE = 48000,        //48kHz, the number of 16-bit samples per second
-	SAMPLE_RATE = 8000,        //the number of 16-bit samples per second
+	SAMPLE_RATE = 16000,        //the number of 16-bit samples per second
 	PACKET_MS = 40,             //How long a single packet of samples is (20ms recommended by Opus)
-	PACKET_SAMPLES = 160,       //Samples per packet
+	PACKET_SAMPLES = 640,       //Samples per packet
 //	PACKET_SAMPLES = 960,       //Samples per packet (48kHz * 0.020s = 960 samples)
 	ENCODED_MAX_BYTES = 480,    //Max size of a single packet's data once compressed (capacity of opus_encode buffer)
 	BUFFERED_PACKETS_MIN = 2,   //How many packets to build up before we start playing audio
