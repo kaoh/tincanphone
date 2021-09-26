@@ -19,11 +19,11 @@ enum Constants {
 	PORT_DEFAULT = 56780,
 	PORT_MAX     = 56789,
 	CHANNELS = 1,               //1 channel (mono) audio
-	CODEC_MODE = CODEC2_MODE_1300,
+	CODEC_MODE = CODEC2_MODE_1400,
 //	SAMPLE_RATE = 48000,        //48kHz, the number of 16-bit samples per second
 	SAMPLE_RATE = 16000,        //16kHz, the number of 16-bit samples per second
 //	PACKET_MS = 20,             //How long a single packet of samples is (20ms recommended by Opus)
-	PACKET_MS = 40,             //How long a single packet of samples is (40ms at 1300 bits)
+	PACKET_MS = 40,             //How long a single packet of samples is (40ms at 1400 bits)
 //	PACKET_SAMPLES = 320,       //Samples per packet (16kHz * 0.020s = 320 samples)
 //	PACKET_SAMPLES = 960,       //Samples per packet (48kHz * 0.020s = 960 samples)
 	PACKET_SAMPLES = 160,       //Samples per packet (16kHz * 0.040s = 160 samples)
